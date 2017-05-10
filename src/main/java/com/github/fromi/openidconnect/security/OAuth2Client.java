@@ -1,10 +1,5 @@
 package com.github.fromi.openidconnect.security;
 
-import static java.util.Arrays.asList;
-import static org.springframework.security.oauth2.common.AuthenticationScheme.form;
-
-import javax.annotation.Resource;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,29 +10,41 @@ import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
+import org.springframework.security.oauth2.common.AuthenticationScheme;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
+
+import javax.annotation.Resource;
+
+import static java.util.Arrays.asList;
 
 @Configuration
 @EnableOAuth2Client
 public class OAuth2Client {
-    @Value("${google.oauth2.clientId}")
+
+    @Value("${auth0.oauth2.scopes}")
+    private String scopes;
+
+    @Value("${auth0.oauth2.domain}")
+    private String domain;
+
+    @Value("${auth0.oauth2.clientId}")
     private String clientId;
 
-    @Value("${google.oauth2.clientSecret}")
+    @Value("${auth0.oauth2.clientSecret}")
     private String clientSecret;
 
     @Bean
-    // TODO retrieve from https://accounts.google.com/.well-known/openid-configuration ?
-    public OAuth2ProtectedResourceDetails googleOAuth2Details() {
-        AuthorizationCodeResourceDetails googleOAuth2Details = new AuthorizationCodeResourceDetails();
-        googleOAuth2Details.setAuthenticationScheme(form);
-        googleOAuth2Details.setClientAuthenticationScheme(form);
-        googleOAuth2Details.setClientId(clientId);
-        googleOAuth2Details.setClientSecret(clientSecret);
-        googleOAuth2Details.setUserAuthorizationUri("https://accounts.google.com/o/oauth2/auth");
-        googleOAuth2Details.setAccessTokenUri("https://www.googleapis.com/oauth2/v3/token");
-        googleOAuth2Details.setScope(asList("openid"));
-        return googleOAuth2Details;
+    // TODO retrieve from https://domain.auth0.com/.well-known/openid-configuration ?
+    public OAuth2ProtectedResourceDetails auth0OAuth2Details() {
+        AuthorizationCodeResourceDetails oAuth2Details = new AuthorizationCodeResourceDetails();
+        oAuth2Details.setAuthenticationScheme(AuthenticationScheme.form);
+        oAuth2Details.setClientAuthenticationScheme(AuthenticationScheme.form);
+        oAuth2Details.setClientId(clientId);
+        oAuth2Details.setClientSecret(clientSecret);
+        oAuth2Details.setUserAuthorizationUri(domain + "authorize");
+        oAuth2Details.setAccessTokenUri(domain + "oauth/token");
+        oAuth2Details.setScope(asList(scopes));
+        return oAuth2Details;
     }
 
     @SuppressWarnings("SpringJavaAutowiringInspection") // Provided by Spring Boot
@@ -46,7 +53,7 @@ public class OAuth2Client {
 
     @Bean
     @Scope(value = "session", proxyMode = ScopedProxyMode.INTERFACES)
-    public OAuth2RestOperations googleOAuth2RestTemplate() {
-        return new OAuth2RestTemplate(googleOAuth2Details(), oAuth2ClientContext);
+    public OAuth2RestOperations auth0OAuth2RestTemplate() {
+        return new OAuth2RestTemplate(auth0OAuth2Details(), oAuth2ClientContext);
     }
 }

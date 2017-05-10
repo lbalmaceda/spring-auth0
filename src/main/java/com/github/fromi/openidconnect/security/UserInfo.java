@@ -1,36 +1,39 @@
 package com.github.fromi.openidconnect.security;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UserInfo {
-    private final String id;
+    private final String sub;
+    private final String email;
     private final String name;
     private final String givenName;
     private final String familyName;
-    private final String gender;
     private final String picture;
-    private final String link;
 
     @JsonCreator
-    public UserInfo(@JsonProperty("id") String id,
+    public UserInfo(@JsonProperty("sub") String sub,
+                    @JsonProperty("email") String email,
                     @JsonProperty("name") String name,
                     @JsonProperty("given_name") String givenName,
                     @JsonProperty("family_name") String familyName,
-                    @JsonProperty("gender") String gender,
-                    @JsonProperty("picture") String picture,
-                    @JsonProperty("link") String link) {
-        this.id = id;
+                    @JsonProperty("picture") String picture) {
+        this.sub = sub;
+        this.email = email;
         this.name = name;
         this.givenName = givenName;
         this.familyName = familyName;
-        this.gender = gender;
         this.picture = picture;
-        this.link = link;
     }
 
-    public String getId() {
-        return id;
+    public String getSub() {
+        return sub;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     public String getName() {
@@ -45,15 +48,7 @@ public class UserInfo {
         return familyName;
     }
 
-    public String getGender() {
-        return gender;
-    }
-
     public String getPicture() {
         return picture;
-    }
-
-    public String getLink() {
-        return link;
     }
 }
